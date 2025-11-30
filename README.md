@@ -33,7 +33,7 @@ Load the package:
 library(musicStats)
 ```
 
-## Creating Tracks
+## 🎶 Creating Tracks
 Create a single track:
 
 ```r
@@ -47,7 +47,7 @@ Tracks include:
 - duration (in seconds)
 - bpm (beats per minute)
 
-## Creating a Playlist
+## 🎼 Creating a Playlist
 Start an empty playlist:
 ```r
 pl <- playlist()
@@ -66,4 +66,45 @@ Count tracks:
 ```r
 length(pl)
 # [1] 3
+```
+## 📊 Playlist Statistics
+
+```r
+avg_bpm(pl)
+# Average beats per minute
+
+total_duration(pl)
+# Total duration in seconds
+```
+Convert to minutes:
+```r
+total_duration(pl) /  60
+```
+
+## 📈 Plotting
+The playlist class includes a custom S3 plot method:
+```r
+plot(pl)
+```
+This produces a ggplot2 bar chart of BPM for all tracks.
+
+## 🎼 Example Dataset
+The package includes a CSV file of example music from spotify most popular.
+Load it:
+```r
+path <- system.file("extdata", "example_tracks.csv", package = "musicStats")
+tracks <- read.csv(path)
+head(tracks)
+```
+Convert to track objects:
+```r
+track_list <- apply(tracks, 1, function(row) {
+  track(row["title"], row["artist"], row["duration"], row["bpm"])
+})
+
+example_playlist <- playlist(track_list)
+```
+Plot BPM of the example playlist:
+```r
+plot(example_playlist)
 ```
