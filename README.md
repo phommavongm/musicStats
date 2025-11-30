@@ -26,3 +26,23 @@ devtools::install("path/to/musicStats")
 
 Or, if the package is already in your working directory:
 devtools::install()
+
+Load the package:
+library(musicStats)
+
+```
+
+## Creating Tracks
+Create a single track:
+
+```r
+t1 <- track("Dancing in the Dark", "Bruce Springsteen", duration = 232, bpm = 148)
+t1
+
+```
+
+Tracks include:
+- title
+- -artist
+- -duration (in seconds)
+- bpm (beats per minute)
