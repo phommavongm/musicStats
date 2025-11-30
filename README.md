@@ -14,3 +14,13 @@ This package is designed as a clean, beginner-friendly example of building a ful
 - A vignette  
 - Unit tests  
 - Example data  
+
+---
+
+## 📦 Installation
+
+To install the development version from your local folder:
+
+```r
+devtools::install("path/to/musicStats")
+```
