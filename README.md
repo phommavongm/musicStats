@@ -23,4 +23,6 @@ To install the development version from your local folder:
 
 ```r
 devtools::install("path/to/musicStats")
-```
+
+Or, if the package is already in your working directory:
+devtools::install()
