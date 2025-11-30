@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Michael Phommavong" />
+
+<meta name="date" content="2025-11-30" />
+
+<title>musicStats: A Simple S3 Music Analysis Package</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">musicStats: A Simple S3 Music Analysis
+Package</h1>
+<h4 class="author">Michael Phommavong</h4>
+<h4 class="date">2025-11-30</h4>
+
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>The <strong>musicStats</strong> package provides a simple S3 object
+system for representing music tracks and playlists.<br />
+It includes tools to:<br />
+- Represent music tracks with metadata<br />
+- Build playlists containing multiple tracks<br />
+- Compute playlist statistics (average BPM, total duration)<br />
+- Visualize track-level statistics<br />
+- Load an example dataset<br />
+This vignette demonstrates how to work with the package from start to
+finish.<br />
+</p>
+</div>
+<div id="creating-track-objects" class="section level2">
+<h2>Creating Track Objects</h2>
+<p>A single track is represented using the track() constructor:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>t1 <span class="ot">&lt;-</span> <span class="fu">track</span>(<span class="st">&quot;Dancing in the Dark&quot;</span>, <span class="st">&quot;Bruce Springsteen&quot;</span>, <span class="at">duration =</span> <span class="dv">232</span>, <span class="at">bpm =</span> <span class="dv">148</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>t1</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; Track: Dancing in the Dark </span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; Artist: Bruce Springsteen </span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; Duration: 232 seconds</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt; BPM: 148</span></span></code></pre></div>
+<p>Each track has:<br />
+- title<br />
+- artist<br />
+- duration (seconds)<br />
+- bpm (beats per minute)<br />
+</p>
+</div>
+<div id="creating-a-playlist" class="section level2">
+<h2>Creating a Playlist</h2>
+<p>You can start an empty playlist:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>pl <span class="ot">&lt;-</span> <span class="fu">playlist</span>()</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>pl</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; $tracks</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; attr(,&quot;class&quot;)</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;playlist&quot;</span></span></code></pre></div>
+<p>Add tracks to it:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> <span class="fu">track</span>(<span class="st">&quot;Blinding Lights&quot;</span>, <span class="st">&quot;The Weeknd&quot;</span>, <span class="at">duration =</span> <span class="dv">200</span>, <span class="at">bpm =</span> <span class="dv">171</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>t3 <span class="ot">&lt;-</span> <span class="fu">track</span>(<span class="st">&quot;Billie Jean&quot;</span>, <span class="st">&quot;Michael Jackson&quot;</span>, <span class="at">duration =</span> <span class="dv">294</span>, <span class="at">bpm =</span> <span class="dv">117</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>pl <span class="ot">&lt;-</span> <span class="fu">add_track</span>(pl, t1)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>pl <span class="ot">&lt;-</span> <span class="fu">add_track</span>(pl, t2)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>pl <span class="ot">&lt;-</span> <span class="fu">add_track</span>(pl, t3)</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">length</span>(pl)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span></code></pre></div>
+</div>
+<div id="viewing-tracks-in-the-playlist" class="section level2">
+<h2>Viewing Tracks in the Playlist</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>pl<span class="sc">$</span>tracks</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; Track: Dancing in the Dark </span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; Artist: Bruce Springsteen </span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; Duration: 232 seconds</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; BPM: 148 </span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; [[2]]</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; Track: Blinding Lights </span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; Artist: The Weeknd </span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; Duration: 200 seconds</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; BPM: 171 </span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; [[3]]</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; Track: Billie Jean </span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; Artist: Michael Jackson </span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; Duration: 294 seconds</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; BPM: 117</span></span></code></pre></div>
+</div>
+<div id="playlist-statistics" class="section level2">
+<h2>Playlist Statistics</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">avg_bpm</span>(pl)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; [1] 145.3333</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">total_duration</span>(pl)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; [1] 726</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="fu">total_duration</span>(pl) <span class="sc">/</span> <span class="dv">60</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; [1] 12.1</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="fu">plot</span>(pl)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="example-dataset" class="section level2">
+<h2>Example Dataset</h2>
+<p>This package contains an example dataset</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Load it with:</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;example_tracks.csv&quot;</span>, <span class="at">package =</span> <span class="st">&quot;musicStats&quot;</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>tracks <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(path)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co"># Convert to track objects</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>track_list <span class="ot">&lt;-</span> <span class="fu">apply</span>(tracks, <span class="dv">1</span>, <span class="cf">function</span>(row) {</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="fu">track</span>(row[<span class="st">&quot;title&quot;</span>], row[<span class="st">&quot;artist&quot;</span>], row[<span class="st">&quot;duration&quot;</span>], row[<span class="st">&quot;bpm&quot;</span>])</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>})</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>example_playlist <span class="ot">&lt;-</span> <span class="fu">playlist</span>(track_list)</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co"># Plot only the first 10 tracks</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>example_playlist_10 <span class="ot">&lt;-</span> <span class="fu">playlist</span>(example_playlist<span class="sc">$</span>tracks[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>])</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="fu">plot</span>(example_playlist_10)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>The <strong>musicStats</strong> package provides a simple but
+powerful illustration of:<br />
+- S3 object design in R<br />
+- Writing clean constructors and methods<br />
+- Creating statistical helper functions<br />
+- Using ggplot2 for visualizations<br />
+- Building a complete R package with documentation and vignettes<br />
+</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+Package: musicStats
+Type: Package
+Title: Simple Music Statistics with S3 Objects
+Version: 0.1.0
+Authors@R: c(
+    person(
+      "Michael", "Phommavong",
+      email = "phommavongm@usf.edu",
+      role = c("aut", "cre")
+    )
+  )
+Description: A simple S3-based package for analyzing music tracks and playlists. 
+    Includes S3 classes for tracks and playlists, summary tools, 
+    and visualization functions using ggplot2.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Imports:
+    ggplot2,
+    stats,
+    utils
+Suggests:
+    testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
