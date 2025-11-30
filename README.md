@@ -46,3 +46,24 @@ Tracks include:
 - artist
 - duration (in seconds)
 - bpm (beats per minute)
+
+## Creating a Playlist
+Start an empty playlist:
+```r
+pl <- playlist()
+```
+Add tracks to it:
+```r
+pl <- add_track(pl, t1)
+
+t2 <- track("Blinding Lights", "The Weeknd", 200, 171)
+t3 <- track("Billie Jean", "Michael Jackson", 294, 117)
+
+pl <- add_track(pl, t2)
+pl <- add_track(pl, t3)
+```
+Count tracks:
+```r
+length(pl)
+# [1] 3
+```
