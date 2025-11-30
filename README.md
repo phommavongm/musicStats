@@ -43,6 +43,6 @@ t1
 
 Tracks include:
 - title
-- -artist
-- -duration (in seconds)
+- artist
+- duration (in seconds)
 - bpm (beats per minute)
