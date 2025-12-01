@@ -1,12 +1,12 @@
 # musicStats
-**musicStats** is a simple R package demonstrating the use of **S3 object-oriented programming** for modeling music tracks and playlists.
+**musicStats** is a simple R package demonstrating the use of **S3 object-oriented programming** for modeling music tracks and playlists.\
 Blog Post Link: https://phommavonglis4370.wordpress.com/2025/11/30/final-project-musicstats/
 
 - Creating track objects  
 - Building playlists  
 - Computing playlist statistics (duration, average BPM)  
 - Visualizing track information with `ggplot2`  
-- Loading an example dataset of 10 songs  
+- Loading an example dataset
 
 This package is designed as a clean, beginner-friendly example of building a full R package with:
 - S3 classes  
